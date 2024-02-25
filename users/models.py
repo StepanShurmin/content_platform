@@ -13,6 +13,7 @@ class User(AbstractUser):
     phone = models.CharField(unique=True, max_length=100, verbose_name="Номер телефона")
     avatar = models.ImageField(upload_to="users/", verbose_name="Аватар", **NULLABLE)
     username = models.CharField(max_length=100)
+    subscriptions = models.ManyToManyField("User", verbose_name=" Подписки", **NULLABLE)
 
     USERNAME_FIELD = "phone"
     REQUIRED_FIELDS = []

@@ -7,6 +7,9 @@ from users.models import User
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = (
-        "username",
+        "pk",
+        "first_name",
+        "last_name",
         "phone",
+        "email",
     )
