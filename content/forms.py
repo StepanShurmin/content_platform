@@ -6,4 +6,8 @@ from content.models import Publication
 class PublicationForm(forms.ModelForm):
     class Meta:
         model = Publication
-        exclude = ("publication_date",)
+        exclude = (
+            "publication_date",
+            "owner",
+            "views_count",
+        )
