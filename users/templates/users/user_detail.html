@@ -16,7 +16,7 @@
                                  alt="...">
                         </div>
                     {% endif %}
-                <div class="col-4 ml-2 mr-2">
+                    <div class="col-4 ml-2 mr-2">
                         <h3>{{ object.first_name }} {{ object.last_name }}</h3>
                         <ul class="list-group">
                             <li class="list-group-item">
@@ -54,17 +54,19 @@
                         {% else %}
                             {% if is_subscribed %}
                                 <a class="btn btn-outline-secondary ml-4 mt-2"
-                                   href="{% url 'user:subscribe' object.pk %}">Отписаться</a>
+                                   href="{% url 'user:unsubscribe_info' object.pk %}">Отписаться</a>
                             {% else %}
                                 <a class="btn btn-danger ml-4 mt-2"
                                    href="{% url 'user:subscribe' object.pk %}">Подписаться</a>
                             {% endif %}
                         {% endif %}
+                    <a class="btn btn-success ml-4 mt-2"
+                                   href="{% url 'content:create_publication' %}">Новая запись</a>
                     </div>
                     <div class="col-3 ml-2 mr-3">
                         <h3>Подписки</h3>
                         <ul>
-                            {% for subscription in object.subscriptions.all %}
+                            {% for subscription in subscriptions.all %}
                                 <li><a href="{% url 'user:profile_view' subscription.pk %}">{{ subscription }}</a></li>
                             {% empty %}
                                 <li>нет подписок</li>
@@ -86,27 +88,17 @@
             <div class="col-2"></div>
             <div class="col-8 mt-4">
                 {% for post in posts %}
-                    <div class="card mb-3">
-                        <div class="card-header">
-                            <a href="{% url 'user:profile_view' post.owner_id %}"
-                               class="d-block text-gray-dark">{{ post.owner }}</a>
-                            <p>{{ post.publication_date }}</p>
-                        </div>
-                        <div class="card-body">
-                            <h4>{{ post.title }}</h4>
-                            <p>{{ post.body }}</p>
-                            <a href="{% url 'content:publication_detail' post.pk %}">просмотр</a>
-                        </div>
-                        <div class="card-footer">
-                            <button type="button" class="btn btn-outline-success mr-4">
-                                Лайк
-                            </button>
-                            <button type="button" class="btn btn-outline-danger mr-4">
-                                Дизлайк
-                            </button>
-                            Просмотры: {{ post.views_count }}
-                        </div>
-                    </div>
+                    {% if post.is_paid %}
+                        {% if post.owner in user.subscriptions.all %}
+                            {% include 'content/includes/include_post_card.html' %}
+                        {% elif post.owner == user %}
+                            {% include 'content/includes/include_post_card.html' %}
+                        {% else %}
+                            {% include 'content/includes/include_hidden_post_card.html' %}
+                        {% endif %}
+                    {% else %}
+                        {% include 'content/includes/include_post_card.html' %}
+                    {% endif %}
                 {% endfor %}
             </div>
         </div>

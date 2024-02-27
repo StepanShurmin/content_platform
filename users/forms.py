@@ -1,17 +1,22 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django.contrib.auth.forms import (
+    UserCreationForm,
+    UserChangeForm,
+    AuthenticationForm,
+)
 
+from content.forms import StyleFormMixin
 from users.models import User
 
 
-class UserRegisterForm(UserCreationForm):
+class UserRegisterForm(StyleFormMixin, UserCreationForm):
 
     class Meta:
         model = User
-        fields = ("phone", "password1", "password2")
+        fields = ("phone", "username", "password1", "password2")
 
 
-class UserProfileChangeForm(UserChangeForm):
+class UserProfileChangeForm(StyleFormMixin, UserChangeForm):
 
     class Meta:
         model = User
@@ -30,3 +35,7 @@ class UserProfileChangeForm(UserChangeForm):
         super().__init__(*args, **kwargs)
 
         self.fields["password"].widget = forms.HiddenInput()
+
+
+class AuthForm(StyleFormMixin, AuthenticationForm):
+    pass

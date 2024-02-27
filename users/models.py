@@ -13,7 +13,7 @@ class User(AbstractUser):
     city = models.CharField(max_length=100, verbose_name="Город", **NULLABLE)
     phone = models.CharField(unique=True, max_length=100, verbose_name="Номер телефона")
     avatar = models.ImageField(upload_to="users/", verbose_name="Аватар", **NULLABLE)
-    username = models.CharField(max_length=100)
+    username = models.EmailField(unique=True, max_length=100, verbose_name="Почта")
     subscriptions = models.ManyToManyField(
         settings.AUTH_USER_MODEL, verbose_name=" Подписки", **NULLABLE
     )

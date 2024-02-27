@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from django.shortcuts import redirect
@@ -14,20 +15,48 @@ from django.views.generic import (
 from content.models import Publication, Likes, Dislikes
 from content.forms import PublicationForm
 from content.service import toggle_like, create_like, toggle_dislike, create_dislikes
+from users.models import User
 
 
 class HomePage(TemplateView):
     template_name = "content/home_page.html"
 
+    def get_context_data(self, **kwargs):
 
-class PublicationCreateView(CreateView):
+        context = super().get_context_data(**kwargs)
+
+        users = User.objects.all()
+        the_most_popular_author = None
+        prev_subscriber_counter = 0
+        for author in users:
+            subscriber_counter = 0
+            for user in users:
+                if author in user.subscriptions.all():
+                    subscriber_counter += 1
+            if subscriber_counter > prev_subscriber_counter:
+                prev_subscriber_counter = subscriber_counter
+                the_most_popular_author = author
+        context["the_most_popular_author"] = the_most_popular_author
+
+        the_most_popular_post = Publication.objects.order_by("-views_count")
+        context["the_most_popular_post"] = the_most_popular_post[0]
+
+        return context
+
+
+class NoPermPage(TemplateView):
+    template_name = "content/no_permission.html"
+
+
+class PublicationCreateView(LoginRequiredMixin, CreateView):
     model = Publication
     form_class = PublicationForm
     success_url = reverse_lazy("home")
+    raise_exception = False
 
     def form_valid(self, form):
         self.object = form.save()
-        self.object.author = self.request.user
+        self.object.owner = self.request.user
         self.object.save()
 
         return super().form_valid(form)
@@ -35,15 +64,17 @@ class PublicationCreateView(CreateView):
 
 class PublicationListView(ListView):
     model = Publication
+    context_object_name = "posts"
 
 
 class PublicationDetailView(DetailView):
     model = Publication
+    context_object_name = "post"
 
     def get_object(self, queryset=None):
 
         self.object = super().get_object(queryset)
-        self.object.views += 1
+        self.object.views_count += 1
         self.object.save()
 
         return self.object
@@ -51,6 +82,8 @@ class PublicationDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
         user = self.request.user
+        if user.pk is None:
+            return context
         obj = self.get_object()
         try:
             like = Likes.objects.get(user=user, publication=obj)
@@ -84,13 +117,22 @@ class PublicationDetailView(DetailView):
         return context
 
 
-class PublicationUpdateView(UpdateView):
+class PublicationUpdateView(LoginRequiredMixin, UpdateView):
     model = Publication
     form_class = PublicationForm
-    success_url = reverse_lazy("home")
+
+    def get(self, request, *args, **kwargs):
+        if request.user == self.get_object().owner:
+            self.object = self.get_object()
+            return super().get(request, *args, **kwargs)
+        else:
+            return redirect(reverse_lazy("no_perm"))
+
+    def get_success_url(self):
+        return reverse_lazy("content:publication_detail", args=[self.object.pk])
 
 
-class SetLikeView(View):
+class SetLikeView(LoginRequiredMixin, View):
     def get(self, request, pk):
         post = Publication.objects.get(pk=pk)
         user = request.user
@@ -126,7 +168,7 @@ class SetLikeView(View):
         return redirect(request.META.get("HTTP_REFERER"))
 
 
-class SetDislikeView(View):
+class SetDislikeView(LoginRequiredMixin, View):
     def get(self, request, pk):
         post = Publication.objects.get(pk=pk)
         user = request.user
@@ -166,6 +208,7 @@ class SetDislikeView(View):
 class SearchListView(ListView):
     model = Publication
     template_name = "content/search_results.html"
+    context_object_name = "posts"
 
     def get_queryset(self):
         query = self.request.GET.get("q")

@@ -1,0 +1,26 @@
+<div class="card mb-3">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-9">
+                <a href="{% url 'user:profile_view' post.owner_id %}"
+                   class="d-block text-gray-dark">{{ post.owner }}</a>
+                <p>{{ post.publication_date }} </p>
+            </div>
+            {% if user == post.owner %}
+                <div class="col-3">
+                    <a href="{% url 'content:update_publication' post.pk %}"
+                       class="btn btn-outline-secondary mt-2">Редактировать</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="card-body">
+        <h4>{{ post.title }}</h4>
+        <p>{{ post.body }}</p>
+        <a href="{% url 'content:publication_detail' post.pk %}">просмотр</a>
+    </div>
+    <div class="card-footer">
+        
+        Просмотры: {{ post.views_count }}
+    </div>
+</div>

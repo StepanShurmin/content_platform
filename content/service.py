@@ -1,4 +1,7 @@
-from content.models import Likes, Dislikes, Publication
+import stripe
+
+from content.models import Likes, Dislikes
+from django.shortcuts import redirect
 
 
 def toggle_like(like):
@@ -25,3 +28,36 @@ def create_like(user, post):
 
 def create_dislikes(user, post):
     Dislikes.objects.create(user=user, publication=post, is_active=True)
+
+
+def create_product(instance):
+    product = stripe.Product.create(name=f"{instance.username}")
+    return product
+
+
+def create_price(instance):
+    product = create_product(instance)
+    price = stripe.Price.create(
+        unit_amount=100,
+        currency="usd",
+        recurring={"interval": "month"},
+        product=f"{product.id}",
+    )
+    return price
+
+
+def create_session(instance):
+    price = create_price(instance)
+    checkout_session = stripe.checkout.Session.create(
+        line_items=[
+            {
+                "price": f"{price.id}",
+                "quantity": 1,
+            },
+        ],
+        mode="subscription",
+        success_url=f"http://127.0.0.1:8000/user/subscribe/{instance.pk}",
+        cancel_url=f"http://127.0.0.1:8000/user/profile/{instance.pk}",
+    )
+
+    return redirect(checkout_session.url, code=303)

@@ -1,0 +1,18 @@
+{% extends 'content/base.html' %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-header">
+            Оплата подписки
+        </div>
+        <div class="card-body">
+            Для просмотра контента от {{ object.first_name }}  оплатите
+            подписку
+            <form action="{% url 'create-checkout-session' object.pk %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success" id="checkout-button">Оплатить</button>
+            </form>
+            <a href="{% url 'user:profile_view' object.pk %}" class="btn btn-danger">Отмена</a>
+        </div>
+    </div>
+{% endblock %}

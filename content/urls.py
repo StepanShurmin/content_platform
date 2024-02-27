@@ -21,5 +21,5 @@ urlpatterns = [
     path("<int:pk>/", PublicationDetailView.as_view(), name="publication_detail"),
     path("like/<int:pk>/", SetLikeView.as_view(), name="set_like"),
     path("dislike/<int:pk>/", SetDislikeView.as_view(), name="set_dislike"),
-    path("search-results", SearchListView.as_view(), name="search"),
+    path("search_results", SearchListView.as_view(), name="search"),
 ]

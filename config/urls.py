@@ -20,11 +20,18 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
-from content.views import HomePage
+from content.views import HomePage, NoPermPage
+from users.views import CreateCheckoutSession
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", HomePage.as_view(), name="home"),
     path("content/", include("content.urls", namespace="content")),
     path("user/", include("users.urls", namespace="user")),
+    path("no_permission/", NoPermPage.as_view(), name="no_perm"),
+    path(
+        "create_checkout_session/<int:pk>/",
+        CreateCheckoutSession.as_view(),
+        name="create_checkout_session",
+    ),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
