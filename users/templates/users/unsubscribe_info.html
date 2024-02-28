@@ -6,7 +6,7 @@
             Подтверждение
         </div>
         <div class="card-body">
-            Вы уверены, что хотите отменить подписку на пользователя {{ object.username }} ?
+            <p class="lead"> Вы уверены, что хотите отменить подписку на пользователя {{ object.username }} ? </p>
             <a href="{% url 'user:subscribe' object.pk %}" class="btn btn-primary">Отписаться</a>
             <a href="{% url 'user:profile_view' object.pk %}" class="btn btn-danger">Отмена</a>
         </div>

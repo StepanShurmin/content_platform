@@ -8,6 +8,7 @@ from content.views import (
     SetLikeView,
     SetDislikeView,
     SearchListView,
+    PublicationDeleteView,
 )
 
 app_name = ContentConfig.name
@@ -17,6 +18,9 @@ urlpatterns = [
     path("", PublicationListView.as_view(), name="list_publications"),
     path(
         "update/<int:pk>/", PublicationUpdateView.as_view(), name="update_publication"
+    ),
+    path(
+        "delete/<int:pk>/", PublicationDeleteView.as_view(), name="delete_publication"
     ),
     path("<int:pk>/", PublicationDetailView.as_view(), name="publication_detail"),
     path("like/<int:pk>/", SetLikeView.as_view(), name="set_like"),

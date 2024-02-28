@@ -2,12 +2,14 @@
 
 {% block content %}
     <div class="my-3 p-3 bg-body rounded shadow-sm">
+    <div class="row">
+        <div class="col-2"></div>
         <div class="col-8">
             {% for post in posts %}
             {% if post.is_paid %}
                     {% if post.owner in user.subscriptions.all %}
                         {% include 'content/includes/include_post_card.html' %}
-                        {% elif post.author == user %}
+                        {% elif post.owner == user %}
                         {% include 'content/includes/include_post_card.html' %}
                     {% else %}
                         {% include 'content/includes/include_hidden_post_card.html' %}

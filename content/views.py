@@ -10,11 +10,12 @@ from django.views.generic import (
     UpdateView,
     DetailView,
     View,
+    DeleteView,
 )
 
 from content.models import Publication, Likes, Dislikes
 from content.forms import PublicationForm
-from content.service import toggle_like, create_like, toggle_dislike, create_dislikes
+from content.service import toggle_like, toggle_dislike
 from users.models import User
 
 
@@ -26,20 +27,22 @@ class HomePage(TemplateView):
         context = super().get_context_data(**kwargs)
 
         users = User.objects.all()
-        the_most_popular_author = None
-        prev_subscriber_counter = 0
-        for author in users:
-            subscriber_counter = 0
-            for user in users:
-                if author in user.subscriptions.all():
-                    subscriber_counter += 1
-            if subscriber_counter > prev_subscriber_counter:
-                prev_subscriber_counter = subscriber_counter
-                the_most_popular_author = author
-        context["the_most_popular_author"] = the_most_popular_author
+        if users.count() > 1:
+            the_most_popular_author = None
+            prev_subscriber_counter = 0
+            for author in users:
+                subscriber_counter = 0
+                for user in users:
+                    if author in user.subscriptions.all():
+                        subscriber_counter += 1
+                if subscriber_counter > prev_subscriber_counter:
+                    prev_subscriber_counter = subscriber_counter
+                    the_most_popular_author = author
+            context["the_most_popular_author"] = the_most_popular_author
 
-        the_most_popular_post = Publication.objects.order_by("-views_count")
-        context["the_most_popular_post"] = the_most_popular_post[0]
+        posts = Publication.objects.order_by("-views_count")
+        if posts:
+            context["the_most_popular_post"] = posts[0]
 
         return context
 
@@ -51,7 +54,7 @@ class NoPermPage(TemplateView):
 class PublicationCreateView(LoginRequiredMixin, CreateView):
     model = Publication
     form_class = PublicationForm
-    success_url = reverse_lazy("home")
+
     raise_exception = False
 
     def form_valid(self, form):
@@ -59,7 +62,17 @@ class PublicationCreateView(LoginRequiredMixin, CreateView):
         self.object.owner = self.request.user
         self.object.save()
 
+        users = User.objects.all()
+
+        for user in users:
+            Likes.objects.create(user=user, publication=self.object)
+            Dislikes.objects.create(user=user, publication=self.object)
+
         return super().form_valid(form)
+
+    def get_success_url(self):
+
+        return reverse_lazy("content:publication_detail", args=[self.object.pk])
 
 
 class PublicationListView(ListView):
@@ -84,7 +97,7 @@ class PublicationDetailView(DetailView):
         user = self.request.user
         if user.pk is None:
             return context
-        obj = self.get_object()
+        obj = self.object
         try:
             like = Likes.objects.get(user=user, publication=obj)
 
@@ -132,38 +145,38 @@ class PublicationUpdateView(LoginRequiredMixin, UpdateView):
         return reverse_lazy("content:publication_detail", args=[self.object.pk])
 
 
+class PublicationDeleteView(DeleteView):
+    model = Publication
+
+    def get(self, request, *args, **kwargs):
+
+        if request.user == self.get_object().owner:
+            self.object = self.get_object()
+            return super().get(request, *args, **kwargs)
+        else:
+            return redirect(reverse_lazy("no_perm"))
+
+    def get_success_url(self):
+
+        return reverse_lazy("content:list_publications")
+
+
 class SetLikeView(LoginRequiredMixin, View):
     def get(self, request, pk):
         post = Publication.objects.get(pk=pk)
         user = request.user
-        try:
-            like = Likes.objects.get(user=user, publication=post)
+        like = Likes.objects.get_or_create(user=user, publication=post)[0]
+        dislike = Dislikes.objects.get_or_create(user=user, publication=post)[0]
 
-            try:
-                dislike = Dislikes.objects.get(user=user, publication=post)
-                if dislike.is_active:
-                    dislike.is_active = False
-                    dislike.save()
-                    like.is_active = True
-                    like.save()
-                else:
-                    toggle_like(like)
+        if dislike.is_active:
 
-            except ObjectDoesNotExist:
+            toggle_dislike(dislike)
 
-                toggle_like(like)
+            toggle_like(like)
 
-        except ObjectDoesNotExist:
-            try:
-                dislike = Dislikes.objects.get(user=user, publication=post)
-                if dislike.is_active:
-                    dislike.is_active = False
-                    dislike.save()
-                    create_like(user, post)
-                else:
-                    create_like(user, post)
-            except ObjectDoesNotExist:
-                create_like(user, post)
+        else:
+
+            toggle_like(like)
 
         return redirect(request.META.get("HTTP_REFERER"))
 
@@ -172,42 +185,25 @@ class SetDislikeView(LoginRequiredMixin, View):
     def get(self, request, pk):
         post = Publication.objects.get(pk=pk)
         user = request.user
-        try:
-            dislike = Dislikes.objects.get(user=user, publication=post)
+        dislike = Dislikes.objects.get_or_create(user=user, publication=post)[0]
+        like = Likes.objects.get_or_create(user=user, publication=post)[0]
 
-            try:
-                like = Likes.objects.get(user=user, publication=post)
+        if like.is_active:
 
-                if like.is_active:
-                    like.is_active = False
-                    like.save()
-                    dislike.is_active = True
-                    dislike.save()
-                else:
-                    toggle_dislike(dislike)
-            except ObjectDoesNotExist:
+            toggle_like(like)
 
-                toggle_dislike(dislike)
+            toggle_dislike(dislike)
 
-        except ObjectDoesNotExist:
-            try:
-                like = Likes.objects.get(user=user, publication=post)
+        else:
 
-                if like.is_active:
-                    like.is_active = False
-                    like.save()
-                    create_dislikes(user, post)
-                else:
-                    create_dislikes(user, post)
-            except ObjectDoesNotExist:
-                create_dislikes(user, post)
+            toggle_dislike(dislike)
 
         return redirect(request.META.get("HTTP_REFERER"))
 
 
 class SearchListView(ListView):
     model = Publication
-    template_name = "content/search_results.html"
+    template_name = "content/publication_list.html"
     context_object_name = "posts"
 
     def get_queryset(self):

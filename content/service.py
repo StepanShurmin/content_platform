@@ -22,14 +22,6 @@ def toggle_dislike(dislike):
         dislike.save()
 
 
-def create_like(user, post):
-    Likes.objects.create(user=user, publication=post, is_active=True)
-
-
-def create_dislikes(user, post):
-    Dislikes.objects.create(user=user, publication=post, is_active=True)
-
-
 def create_product(instance):
     product = stripe.Product.create(name=f"{instance.username}")
     return product

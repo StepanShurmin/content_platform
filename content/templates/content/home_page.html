@@ -1,15 +1,17 @@
 {% extends 'content/base.html' %}
 
 {% block content %}
-    <div class="d-md-flex flex-md-equal w-100 my-md-3 ps-md-3">
-        <div class="text-bg-dark me-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden">
+    <div class="d-md-flex flex-md-equal w-100 my-md-3 ps-md-3 border-bottom">
+        <div class="col-8 text-bg-dark me-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden border-right">
             <div class="my-3 py-3">
                 <h2 class="display-5">Самый популярный автор</h2>
                 <p class="lead">{{ the_most_popular_author }}</p>
-                <a href="{% url 'user:profile_view' the_most_popular_author.pk %}">Перейти к автору</a>
+                {% if the_most_popular_author %}
+                    <a href="{% url 'user:profile_view' the_most_popular_author.pk %}">Перейти к автору</a>
+                {% endif %}
                 </div>
             </div>
-        <div class="bg-body-tertiary me-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden">
+        <div class="col-4 text-bg-dark me-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden">
             <div class="my-3 p-3">
                 <h2 class="display-5">Создайте свой контент</h2>
                 <a class="btn btn-outline-primary" href="{% url 'content:create_publication' %}">Создать</a>
@@ -17,17 +19,19 @@
         </div>
     </div>
     <div class="d-md-flex flex-md-equal w-100 my-md-3 ps-md-3">
-        <div class="text-bg-dark me-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden">
+        <div class="col-4 text-bg-dark me-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden border-right">
             <div class="my-3 py-3">
                 <h2 class="display-5">Регистрация</h2>
                 <a class="lead" href="{% url 'user:register' %}">Зарегистрироваться</a>
             </div>
         </div>
-        <div class="bg-body-tertiary me-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden">
+        <div class="col-8 bg-body-tertiary me-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden">
             <div class="my-3 p-3">
                 <h2 class="display-5">Самый популярный пост</h2>
                 <p class="lead">{{ the_most_popular_post }}</p>
-                <a href="{% url 'content:publication_detail' the_most_popular_post.pk %}">К публикации</a>
+                {% if the_most_popular_post %}
+                    <a href="{% url 'content:publication_detail' the_most_popular_post.pk %}">К публикации</a>
+                {% endif %}
             </div>
         </div>
     </div>
