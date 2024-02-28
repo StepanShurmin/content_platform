@@ -1,7 +1,9 @@
+from django.conf import settings
+from django.shortcuts import redirect
+
 import stripe
 
-from content.models import Likes, Dislikes
-from django.shortcuts import redirect
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 def toggle_like(like):
@@ -14,6 +16,7 @@ def toggle_like(like):
 
 
 def toggle_dislike(dislike):
+
     if dislike.is_active:
         dislike.is_active = False
         dislike.save()

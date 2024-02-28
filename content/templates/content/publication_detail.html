@@ -2,7 +2,7 @@
 
 {% block content %}
     <div class="my-3 p-3 bg-body rounded shadow-sm">
-    <div class="row">
+        <div class="row">
             <div class="col-2"></div>
         <div class="col-8">
             <div class="card mb-3">
@@ -27,7 +27,7 @@
                 </div>
                 <div class="card-footer">
                     {% if is_liked %}
-                        <a type="button" class="btn btn-outline-success mr-4"
+                        <a type="button" class="btn btn-success mr-4"
                            href="{% url 'content:set_like' object.pk %}">
                             {% include 'content/includes/svg/heart_fill.html' %}
                             {{ like_counter }}
@@ -39,6 +39,7 @@
                             {{ like_counter }}
                         </a>
                     {% endif %}
+
                     {% if is_disliked %}
                         <a type="button" class="btn btn-danger mr-4"
                            href="{% url 'content:set_dislike' object.pk %}">
@@ -56,8 +57,7 @@
                     {{ object.views_count }}
                 </div>
             </div>
-            
-            </div>
+        </div>
         </div>
     </div>
 {% endblock %}

@@ -16,6 +16,7 @@
                                  alt="...">
                         </div>
                     {% endif %}
+
                     <div class="col-5 ml-2 mr-2">
                         <h3>{{ object.first_name }} {{ object.last_name }}</h3>
                         <ul class="list-group">
@@ -37,23 +38,25 @@
                             </li>
                         </ul>
                         {% if is_current_user %}
-                            <a class="btn btn-outline-secondary mt-2" href="{% url 'user:profile_update' %}"> Редактировать
+                            <a class="btn btn-outline-secondary mt-2" href="{% url 'user:profile_update' %}">
+                                Редактировать
                                 профиль</a>
+                            <a class="btn btn-success ml-2 mt-2"
+                               href="{% url 'content:create_publication' %}">Новая запись</a>
                         {% else %}
                             {% if is_subscribed %}
                                 <a class="btn btn-outline-secondary mt-2"
                                    href="{% url 'user:unsubscribe_info' object.pk %}">Отписаться</a>
                             {% else %}
                                 <a class="btn btn-danger mt-2"
-                                   href="{% url 'user:subscribe' object.pk %}">Подписаться</a>
+                                   href="{% url 'user:subscribe_info' object.pk %}">Подписаться</a>
                             {% endif %}
                         {% endif %}
-                    
                     </div>
                     <div class="col-3 ml-2 mr-3">
                         <h3>Подписки</h3>
                         <ul>
-                            {% for subscription in subscriptions.all %}
+                            {% for subscription in subscriptions %}
                                 <li><a href="{% url 'user:profile_view' subscription.pk %}">{{ subscription }}</a></li>
                             {% empty %}
                                 <li>нет подписок</li>
@@ -83,9 +86,9 @@
                         {% else %}
                             {% include 'content/includes/include_hidden_post_card.html' %}
                         {% endif %}
-                        {% else %}
-                            {% include 'content/includes/include_post_card.html' %}
-                        {% endif %}
+                    {% else %}
+                        {% include 'content/includes/include_post_card.html' %}
+                    {% endif %}
                 {% endfor %}
             </div>
         </div>

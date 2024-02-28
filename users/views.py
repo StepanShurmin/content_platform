@@ -14,7 +14,7 @@ from django.views.generic import (
 )
 
 from content.models import Publication
-from content.service import create_session
+from content.services import create_session
 from users.forms import UserRegisterForm, UserProfileChangeForm, AuthForm
 from users.models import User
 
@@ -157,5 +157,23 @@ class SubscriptionListView(LoginRequiredMixin, ListView):
         user = self.request.user
         subscriptions = user.subscriptions.all()
         context["subscriptions"] = subscriptions
+
+        return context
+
+
+class SubscriptionPublicationView(DetailView):
+    model = User
+    template_name = "users/subscriptions_posts.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        author = self.object
+        posts = Publication.objects.filter(owner=author)
+        context["posts"] = posts
+
+        user = self.request.user
+        subscriptions = user.subscriptions.all()
+        context["subscriptions"] = subscriptions
+        context["user"] = self.request.user
 
         return context

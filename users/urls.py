@@ -1,4 +1,7 @@
+from django.contrib.auth.views import LogoutView
 from django.urls import path
+
+from users.apps import UsersConfig
 from users.views import (
     RegisterView,
     ProfileUpdateView,
@@ -9,9 +12,8 @@ from users.views import (
     Login,
     SubscribeInfoView,
     UnsubscribeInfoView,
+    SubscriptionPublicationView,
 )
-from users.apps import UsersConfig
-from django.contrib.auth.views import LogoutView
 
 app_name = UsersConfig.name
 
@@ -29,5 +31,10 @@ urlpatterns = [
         "unsubscribe_info/<int:pk>",
         UnsubscribeInfoView.as_view(),
         name="unsubscribe_info",
+    ),
+    path(
+        "subscriptions/<int:pk>",
+        SubscriptionPublicationView.as_view(),
+        name="subscription_posts",
     ),
 ]

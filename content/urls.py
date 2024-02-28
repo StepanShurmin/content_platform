@@ -19,10 +19,10 @@ urlpatterns = [
     path(
         "update/<int:pk>/", PublicationUpdateView.as_view(), name="update_publication"
     ),
+    path("<int:pk>/", PublicationDetailView.as_view(), name="publication_detail"),
     path(
         "delete/<int:pk>/", PublicationDeleteView.as_view(), name="delete_publication"
     ),
-    path("<int:pk>/", PublicationDetailView.as_view(), name="publication_detail"),
     path("like/<int:pk>/", SetLikeView.as_view(), name="set_like"),
     path("dislike/<int:pk>/", SetDislikeView.as_view(), name="set_dislike"),
     path("search_results", SearchListView.as_view(), name="search"),

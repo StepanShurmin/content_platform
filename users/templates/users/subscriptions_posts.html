@@ -10,7 +10,7 @@
                 {% if subscription.id == object.id %}
                     <li class="nav-item">
                         <a class="nav-link active"
-                           href="{% url 'user:subscriptions_posts' subscription.pk %}">{{ subscription }}</a>
+                           href="{% url 'user:subscription_posts' subscription.pk %}">{{ subscription }}</a>
                     </li>
                 {% else %}
                     <li class="nav-item">

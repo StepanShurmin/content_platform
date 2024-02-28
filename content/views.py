@@ -3,23 +3,24 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
+from django.views import View
 from django.views.generic import (
     TemplateView,
     CreateView,
     ListView,
     UpdateView,
     DetailView,
-    View,
     DeleteView,
 )
 
-from content.models import Publication, Likes, Dislikes
 from content.forms import PublicationForm
-from content.service import toggle_like, toggle_dislike
+from content.models import Publication, Likes, Dislikes
+from content.services import toggle_like, toggle_dislike
 from users.models import User
 
 
 class HomePage(TemplateView):
+
     template_name = "content/home_page.html"
 
     def get_context_data(self, **kwargs):
@@ -54,7 +55,6 @@ class NoPermPage(TemplateView):
 class PublicationCreateView(LoginRequiredMixin, CreateView):
     model = Publication
     form_class = PublicationForm
-
     raise_exception = False
 
     def form_valid(self, form):
@@ -71,7 +71,6 @@ class PublicationCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-
         return reverse_lazy("content:publication_detail", args=[self.object.pk])
 
 
@@ -85,7 +84,6 @@ class PublicationDetailView(DetailView):
     context_object_name = "post"
 
     def get_object(self, queryset=None):
-
         self.object = super().get_object(queryset)
         self.object.views_count += 1
         self.object.save()
@@ -97,6 +95,7 @@ class PublicationDetailView(DetailView):
         user = self.request.user
         if user.pk is None:
             return context
+
         obj = self.object
         try:
             like = Likes.objects.get(user=user, publication=obj)
@@ -108,6 +107,7 @@ class PublicationDetailView(DetailView):
 
         except ObjectDoesNotExist:
             context["is_liked"] = False
+
         try:
             dislike = Dislikes.objects.get(user=user, publication=obj)
 
@@ -149,7 +149,6 @@ class PublicationDeleteView(DeleteView):
     model = Publication
 
     def get(self, request, *args, **kwargs):
-
         if request.user == self.get_object().owner:
             self.object = self.get_object()
             return super().get(request, *args, **kwargs)
@@ -157,7 +156,6 @@ class PublicationDeleteView(DeleteView):
             return redirect(reverse_lazy("no_perm"))
 
     def get_success_url(self):
-
         return reverse_lazy("content:list_publications")
 
 
@@ -169,13 +167,9 @@ class SetLikeView(LoginRequiredMixin, View):
         dislike = Dislikes.objects.get_or_create(user=user, publication=post)[0]
 
         if dislike.is_active:
-
             toggle_dislike(dislike)
-
             toggle_like(like)
-
         else:
-
             toggle_like(like)
 
         return redirect(request.META.get("HTTP_REFERER"))
@@ -189,13 +183,9 @@ class SetDislikeView(LoginRequiredMixin, View):
         like = Likes.objects.get_or_create(user=user, publication=post)[0]
 
         if like.is_active:
-
             toggle_like(like)
-
             toggle_dislike(dislike)
-
         else:
-
             toggle_dislike(dislike)
 
         return redirect(request.META.get("HTTP_REFERER"))
