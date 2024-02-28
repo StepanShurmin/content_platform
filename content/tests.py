@@ -1,12 +1,10 @@
 from django.test import TestCase, Client
 
-from content.models import Publication, Likes, Dislikes
+from content.models import Publication
 from content.services import (
-    toggle_like,
     create_session,
     create_price,
     create_product,
-    toggle_dislike,
 )
 from users.models import User
 
@@ -33,6 +31,7 @@ class PublicationTestCase(TestCase):
         )
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, "/content/2/")
+        self.assertTrue(Publication.objects.all().exists())
 
     def test_read_post(self):
         client = Client()
