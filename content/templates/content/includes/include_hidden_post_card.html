@@ -1,0 +1,12 @@
+<div class="card mb-3">
+    <div class="card-header">
+        <a href="{% url 'user:profile_view' post.owner_id %}"
+           class="d-block text-gray-dark">{{ post.owner.username }}</a>
+        <p>{{ post.publication_date }}</p>
+    </div>
+    <div class="card-body">
+        <h4>{{ object.title }}</h4>
+        {% include 'content/includes/svg/lock.html' %}
+        Для просмотра нужна платная подписка
+    </div>
+</div>

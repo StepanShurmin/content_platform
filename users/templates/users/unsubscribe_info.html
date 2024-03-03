@@ -1,0 +1,14 @@
+{% extends 'content/base.html' %}
+
+{% block content %}
+    <div class="card text-center mt-4">
+        <div class="card-header">
+            <h3>Подтверждение</h3>
+        </div>
+        <div class="card-body">
+            <p class="lead">Вы уверены, что хотите отменить подписку на пользователя {{ object.username }} ?</p>
+            <a href="{% url 'user:subscribe' object.pk %}" class="btn btn-primary">Отписаться</a>
+            <a href="{% url 'user:profile_view' object.pk %}" class="btn btn-danger">Отмена</a>
+        </div>
+    </div>
+{% endblock %}

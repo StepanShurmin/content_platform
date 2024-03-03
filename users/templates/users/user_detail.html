@@ -1,0 +1,96 @@
+{% extends 'content/base.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row flex-column">
+            <div class="card pl-4 pt-4 pb-4 mt-4">
+                <div class="row">
+                    {% if object.avatar %}
+                        <div class="img_wrap ml-3 mr-2">
+                            <img src="../../../media/{{ object.avatar }}" class="rounded float-start"
+                                 alt="...">
+                        </div>
+                    {% else %}
+                        <div class="img_wrap ml-3 mr-2">
+                            <img src="../../../media/users/ава_деф.jpeg" class="rounded float-start mt-4"
+                                 alt="...">
+                        </div>
+                    {% endif %}
+
+                    <div class="col-5 ml-2 mr-2">
+                        <h3>{{ object.first_name }} {{ object.last_name }}</h3>
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                {% include 'users/includes/svg/at.html' %}
+                                {{ object.username }}
+                            </li>
+                            <li class="list-group-item">
+                                {% include 'users/includes/svg/gift.html' %}
+                                {{ object.birthday }}
+                            </li>
+                            <li class="list-group-item">
+                                {% include 'users/includes/svg/point.html' %}
+                                {{ object.city }}
+                            </li>
+                            <li class="list-group-item">
+                                {% include 'users/includes/svg/phone.html' %}
+                                {{ object.phone }}
+                            </li>
+                        </ul>
+                        {% if is_current_user %}
+                            <a class="btn btn-outline-secondary mt-2" href="{% url 'user:profile_update' %}">
+                                Редактировать
+                                профиль</a>
+                            <a class="btn btn-success ml-2 mt-2"
+                               href="{% url 'content:create_publication' %}">Новая запись</a>
+                        {% else %}
+                            {% if is_subscribed %}
+                                <a class="btn btn-outline-secondary mt-2"
+                                   href="{% url 'user:unsubscribe_info' object.pk %}">Отписаться</a>
+                            {% else %}
+                                <a class="btn btn-danger mt-2"
+                                   href="{% url 'user:subscribe_info' object.pk %}">Подписаться</a>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                    <div class="col-3 ml-2 mr-3">
+                        <h3>Подписки</h3>
+                        <ul>
+                            {% for subscription in subscriptions %}
+                                <li><a href="{% url 'user:profile_view' subscription.pk %}">{{ subscription }}</a></li>
+                            {% empty %}
+                                <li>нет подписок</li>
+                            {% endfor %}
+                        </ul>
+                        <h3>Подписчики</h3>
+                        <ul>
+                            {% for subscriber in subscribers %}
+                                <li><a href="{% url 'user:profile_view' subscriber.pk %}">{{ subscriber }}</a></li>
+                            {% empty %}
+                                <li>нет подписчиков</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-2"></div>
+            <div class="col-8 mt-4">
+                {% for post in posts %}
+                    {% if post.is_paid %}
+                        {% if post.owner in user.subscriptions.all %}
+                            {% include 'content/includes/include_post_card.html' %}
+                        {% elif post.owner == user %}
+                            {% include 'content/includes/include_post_card.html' %}
+                        {% else %}
+                            {% include 'content/includes/include_hidden_post_card.html' %}
+                        {% endif %}
+                    {% else %}
+                        {% include 'content/includes/include_post_card.html' %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

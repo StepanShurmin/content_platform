@@ -1,0 +1,76 @@
+<div class="card mb-3">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-8">
+                <a href="{% url 'user:profile_view' post.owner_id %}"
+                   class="d-block text-gray-dark">{{ post.owner.username }}</a>
+                <p>{{ post.publication_date }} </p>
+            </div>
+            {% if user == post.owner %}
+                <div class="col-2"></div>
+                <div class="col-2">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle mt-2" type="button"
+                                id="dropdownMenuButton1"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                            {% include 'content/includes/svg/three_points.html' %}
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                            <li class="nav-item">
+                                <a href="{% url 'content:update_publication' post.pk %}"
+                                   class="nav-link text-secondary" aria-current="page">
+                                    Редактировать
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{% url 'content:delete_publication' post.pk %}"
+                                   class="nav-link text-danger" aria-current="page">
+                                    Удалить
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="card-body">
+        <h4>{{ post.title }}</h4>
+        <p>{{ post.body }}</p>
+        <a href="{% url 'content:publication_detail' post.pk %}">просмотр</a>
+    </div>
+    <div class="card-footer">
+        {% for like in post.like_set.all %}
+            {% if like.user == user %}
+                {% if like.is_active %}
+                    <a type="button" class="btn btn-success mr-4"
+                       href="{% url 'content:set_like' post.pk %}">
+                        {% include 'content/includes/svg/heart_fill.html' %}
+                    </a>
+                {% else %}
+                    <a type="button" class="btn btn-outline-success mr-4"
+                       href="{% url 'content:set_like' post.pk %}">
+                        {% include 'content/includes/svg/heart.html' %}
+                    </a>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        {% for dislike in post.dislike_set.all %}
+            {% if dislike.user == user %}
+                {% if dislike.is_active %}
+                    <a type="button" class="btn btn-danger mr-4"
+                       href="{% url 'content:set_dislike' post.pk %}">
+                        {% include 'content/includes/svg/heart_broken_fill.html' %}
+                    </a>
+                {% else %}
+                    <a type="button" class="btn btn-outline-danger mr-4"
+                       href="{% url 'content:set_dislike' post.pk %}">
+                        {% include 'content/includes/svg/heart_broken.html' %}
+                    </a>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        {% include 'content/includes/svg/eye.html' %}
+        {{ post.views_count }}
+    </div>
+</div>
